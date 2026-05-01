@@ -1,3 +1,10 @@
+# git pull
+# or git clone if you dont have this in your pc
+# edit your script
+# git add .
+# git commit -m "update script"
+# git push
+
 #first sync the fork in CytometryInR folder
 # the bring all local in the positron by pull request
 # and then do the new folder project and copy the data
