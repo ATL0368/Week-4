@@ -1,25 +1,77 @@
-thefilepath <- file.path("data","dataset.csv")
-> thefilepath
-#getwd() to see in which file path you are.
-#Setwd to change in the path file. 
+#first sync the fork in CytometryInR folder
+# the bring all local in the positron by pull request
+# and then do the new folder project and copy the data
+#and then do the first commit 
+#and then do the fist push to get the data in github
+# for homeworks will be branch to branch transfer, more details in week 5
 
+#to work with FCS files and exel sheets in a 
+# easier maner than copied and pasted contents of columns
+# changing names, etc
+#so to tidy the data
+# use of the tidyverse package
+#The dataset we will be using today is a manually-gated spectral flow cytometry dataset
+#from proliferal blood
+# also you can use your own dataset using the data.frame by extracting the matrix.
+
+thefilepath <- file.path("data","Dataset.csv")
+#you can specify the name itself and the file type
+#you bypass the list.files step
+#thefilepath is more robust
+#getwd() to see in which file path you are.
+#setwd to change in the path file. 
+setwd("C:/Users/al2271/OneDrive - University of Cambridge/Documents/Anjana/Knowledge/R/Week-4/04_IntroToTidyverse")
+#functions for exel files read.csv is already in the main packages
 data <- read.csv(file=thefilepath, check.names=FALSE)
+
 colnames(data)
+#it retrieve all colum names that are present in the datase
+ [1] "bid"               "timepoint"         "Condition"        
+ [4] "Date"              "infant_sex"        "ptype"            
+ [7] "root"              "singletsFSC"       "singletsSSC"      
+[10] "singletsSSCB"      "CD45"              "NotMonocytes"     
+[13] "nonDebris"         "lymphocytes"       "live"             
+[16] "Dump+"             "Dump-"             "Tcells"           
+[19] "Vd2+"              "Vd2-"              "Va7.2+"           
+[22] "Va7.2-"            "CD4+"              "CD4-"             
+[25] "CD8+"              "CD8-"              "Tcells_count"     
+[28] "lymphocytes_count" "Monocytes"         "Debris"           
+[31] "CD45_count"
+#it seems like metadata, flowcytometry names, and gates
 data_alternative <- read.csv(file=thefilepath, check.names=TRUE)
 colnames(data_alternative)
 # the difference between check.names False or True. in False it 
 #will give you names as they are
+# "Va7.2..1" instead Var7.2-. 
 # in True it will change special characters, spaces with a dot and + or - for 1 and 2.
 # it convert in R names. R-approved syntax.
 #you can convert the names to avoid special characters
+#so for csv files always do FALSE in check.names
 head # to see first rows
+head(data, 5) # first name of the file and then number of rows you want to see.
 view # to see hole matrix in "exel format"
+#buy expanding in the second sidebar
 class # to see which type is the whole thing
+> class(data)
+[1] "data.frame"
 str # to see which type is each columm (internal structure)
-glimple # very similar to str
+#data.frame':	196 obs. of  31 variables
+#also another way to check dataframes is the glimpse function
+#but first first check in which package is this function
+??glimpse # andthe help function tell that is dplyr
+library(dplyr)
+glimpse # very similar to str
+glimpse(data)
+# for each row it tells you which kind data is it. chr, int, dbl
+#dbl = has decimal point
+#int = integrity number/whole
+#chr = letters.
 dim # to see number of rows + number of colums
+ dim(data)
+[1] [196  31] # first rows,196 and then colums,31
 #to find somthing inside a the data set for colums
 data$Tcells_count. # the file, and name of the columm
+#to check which kind of data is it
 is.character(data$Tcells_count) #False
 is.numeric(data$Tcells_count) # True
 is.integer(data$Tcells_count) # for hole numbers
@@ -29,6 +81,7 @@ is.numeric(data$CD8-) #instead
 is.numeric(data$`CD8-`)
 library(dplyr) #select colums, filter rowcs, create new variables, group data, summarise data
 #select, one colum from all the data set. 
+"""""""""""" # 26 minutes here to stay!
 datecolumm <-select (data, "Date") # dataset, and desired columm
 # or you can write it like this too
 datecolumm1 <- data  |> select("Date")
