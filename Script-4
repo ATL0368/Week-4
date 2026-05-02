@@ -1,5 +1,6 @@
 # git pull
 # or git clone if you dont have this in your pc
+#also is the same of folder selector ( up righ corner), and do new folder from git
 # edit your script
 # git add .
 # git commit -m "update script"
@@ -12,6 +13,12 @@
 #and then do the fist push to get the data in github
 # for homeworks will be branch to branch transfer, more details in week 5
 
+# the complete guide: https://umgcccfcsr.github.io/CytometryInR/course/04_IntroToTidyverse/
+#the youtube video: https://www.youtube.com/watch?v=luC7SY4RJcU
+
+#getwd() to see in which file path you are.
+#setwd to change in the path file. 
+
 #to work with FCS files and exel sheets in a 
 # easier maner than copied and pasted contents of columns
 # changing names, etc
@@ -20,14 +27,17 @@
 #The dataset we will be using today is a manually-gated spectral flow cytometry dataset
 #from proliferal blood
 # also you can use your own dataset using the data.frame by extracting the matrix.
+#function from the utils package (included in our base R software installation) to read it into R
+# so we do not need to load a package
 
 thefilepath <- file.path("data","Dataset.csv")
 #you can specify the name itself and the file type
 #you bypass the list.files step
 #thefilepath is more robust
-#getwd() to see in which file path you are.
-#setwd to change in the path file. 
+
 setwd("C:/Users/al2271/OneDrive - University of Cambridge/Documents/Anjana/Knowledge/R/Week-4/04_IntroToTidyverse")
+setwd("C:/Users/anjan/Downloads/R course/Week-4/04_IntroToTidyverse") #home 
+
 #functions for exel files read.csv is already in the main packages
 data <- read.csv(file=thefilepath, check.names=FALSE)
 
@@ -56,7 +66,7 @@ colnames(data_alternative)
 #so for csv files always do FALSE in check.names
 head # to see first rows
 head(data, 5) # first name of the file and then number of rows you want to see.
-view # to see hole matrix in "exel format"
+View # to see hole matrix in "exel format"
 #buy expanding in the second sidebar
 class # to see which type is the whole thing
 > class(data)
@@ -86,9 +96,11 @@ is.double(data$Tcells_count) # for numbers with decimals.
 #special characters, need tick marks
 is.numeric(data$CD8-) #instead
 is.numeric(data$`CD8-`)
-library(dplyr) #select colums, filter rowcs, create new variables, group data, summarise data
+library(dplyr) 
+# used to manipulate and clean tabular data
+#select colums, filter rows, create new variables, group data, summarise data
 #select, one colum from all the data set. 
-"""""""""""" # 26 minutes here to stay!
+
 datecolumm <-select (data, "Date") # dataset, and desired columm
 # or you can write it like this too
 datecolumm1 <- data  |> select("Date")
@@ -97,6 +109,8 @@ datecolumm1 <- data  |> select("Date")
 datecolumm2 <- data  %>% select("Date")
 #pipes allow to link togheter differnt ones instead of needeing
 #to write line by line
+#can be linked together, passing resulting objects of one operation on to the next pipe and subsequent function.
+
 nrow() # total number of rows
 data |> select("Date") |> nrow()
 # so in this case will be how many rows  there is in the colum "date"
@@ -107,12 +121,17 @@ subtset <-data |> select(Tcells, `CD8+`, `CD4+`)
 subtset2 <-data |> select (`CD8+`, `CD4+`, bid)
 #you can select the colums that you want
 relocate() # to change the colums around
+# does not chage the csv file, just how we see in R session.
+
 data |> relocate(Tcells, .after=bid)|>head(5)
 data |> relocate(Tcells, Monocytes, .after=bid)|>head(5)
 data |> relocate(Tcells, .before=Date)|>head(5)
 # you can put befre or after a colum name but also considering
 #the postion like 1, 3...
 data |> relocate(Tcells, .before=2)|>head(5)
+# also to just select one colum
+select()
+data |> select(singletsSSCB) # will show just information for this colum
 #to rename
 colnames(subset)
 colnames(subset)[3] <- CD4positive
@@ -122,15 +141,20 @@ ranemed <-subset |> rename (CD8pos =`CD8+`)
 pull # grave the numbers from a specific columm
 #ex: just the dates for the 4 first rows
 data |> pull(Date)|> head(4)
+data |> pull(lymphocytes) |> head (5)
+data |> pull(`Va7.2-`) |> head (5)
 unique # will give you the non repeated values
-data |> pull(Date)|> unique
+data |> pull(Date)|> unique()
 #now for rows
  data |> pull(Condition) |>unique()
 [1] "Ctrl" "PPD"  "SEB"
+#filter
 PPDonly <- data |> filter(Condition == "PPD")
+# == matching this name
 # in == sign can have glitshes insted %in%
+# %in% is safer approach when you want to use character values/numerics
 data |> filter(Condition %in% "PPD") |> head(10)
-#for specify multiples you create a vector
+#for specify multiples you create a vector as an object
 data |> filter(Condition %in% c("PPD","SEB")) |> head(10)
 # you can do an object for that
 theseconditions <- c("PPD","SEB")
@@ -138,9 +162,74 @@ data |> filter(Condition %in% theseconditions) |> head(10)
 # for Conditionals
 # using the exclamation mark will change the value to opossite
 # isthisspectral <-TRUE
-# !isthisspectral = false
+# !isthisspectral = FALSE
+IsThisASpectralInstrument <- TRUE
+!IsThisASpectralInstrument
+[1] FALSE
 subset <- data |> filter(!Conditions %in% "SEB")
 # this will keep everything less SEB
+#timepoints 0,4,9
+subset_2 <- data |> filter (timepoint%in% "0" )# just for 0h
+subset_2 <- data |> filter (!timepoint%in% "0" ) # for 4 and 9h only, not 0
 #mutate
-# video https://www.youtube.com/watch?v=NrCjicGgbhM
-#minute 43"
+TidyData <- Data |> filter(Condition %in% "Ctrl") |> filter(timepoint %in% "0") |>
+     select(bid, timepoint, Condition, Date, Tcells_count, CD45_count) |>
+      rename(specimen=bid, condition=Condition) |> relocate(Date, .after=specimen)
+    #first condition colum and just selecting control, then the time point
+    #where just value of 0h
+    # then select the number of colums
+    #then rename to change the colum names
+    #relocate, place date after specifmen colum
+#so now output is just 23 rows
+    specimen       Date timepoint condition Tcells_count CD45_count
+1   INF0052 26/07/2025         0      Ctrl       164771     915203
+2   INF0100 26/07/2025         0      Ctrl       208241    1438047
+3   INF0179 26/07/2025         0      Ctrl       291777     940733
+4   INF0134 29/07/2025         0      Ctrl       127866     689676
+5   INF0148 29/07/2025         0      Ctrl       234335    1013985
+6   INF0191 29/07/2025         0      Ctrl        55780     715443
+7   INF0124 31/07/2025         0      Ctrl        70297     687720
+8   INF0149 31/07/2025         0      Ctrl       107900     857845
+9   INF0169 31/07/2025         0      Ctrl        75540     854594
+10  INF0019 05/08/2025         0      Ctrl       208055     873622
+11  INF0032 05/08/2025         0      Ctrl       361034     753064
+12  INF0180 05/08/2025         0      Ctrl       284958    1049663
+13  INF0155 07/08/2025         0      Ctrl       281626    1065048
+14  INF0158 07/08/2025         0      Ctrl       280913    1249338
+15  INF0159 07/08/2025         0      Ctrl       452551    1190219
+16  INF0013 22/08/2025         0      Ctrl       182751     836573
+17  INF0023 22/08/2025         0      Ctrl       218435     968035
+18  INF0030 22/08/2025         0      Ctrl        85521     732321
+19  INF0166 28/08/2025         0      Ctrl       225650     739495
+20  INF0199 28/08/2025         0      Ctrl       169736    1112176
+21  INF0207 28/08/2025         0      Ctrl        39055     905365
+22  INF0614 30/08/2025         0      Ctrl       224396    1569007
+23  INF0622 30/08/2025         0      Ctrl       161924     939307
+#mutate() function can be used to modify existing columns, 
+# as well as to create new ones
+# so to get the proportion of T cells
+TidyData <- TidyData |> mutate(Tcells_ProportionCD45 = Tcells_count / CD45_count)
+# so new colum will have a algorithm in this case just 
+#a division so colum = algorith
+# but it give too many decimal digits 0.18003765
+# so to ruond them up
+TidyData <- TidyData |> mutate(TcellsRounded = round(Tcells_ProportionCD45, 2))
+# so new colum will apear
+#or if we want to do percentatge
+TidyData <- TidyData |> mutate(TcellsPercentage = TcellsRounded * 100)
+#arrange
+#this is for rows
+desc() or arrange()
+TidyData <- TidyData |> arrange(desc(TcellsRounded))
+TidyData |> filter(TcellsRounded > 0.3)
+TidyData |> filter(TcellsRounded > 0.3) |> pull(specimen)
+[1] "INF0032" "INF0159" "INF0179" "INF0166"
+#so convination of each function to see data you need
+#you may want to save this for later use
+#istead of modifying the existing csv file you can create a new one
+NewName <- paste0("MyNewDataset", ".csv")
+StorageLocation <- file.path("data", NewName)
+write.csv(TidyData, StorageLocation, row.names=FALSE)
+
+#this way is easier to track all changes that you are doing in the file
+# you don't overight data
